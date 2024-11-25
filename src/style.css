@@ -1,0 +1,64 @@
+html{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+*,*::after, *::before{
+    box-sizing: inherit;
+    border:1px solid black;
+}
+
+body{
+    padding:0;
+    margin:0;
+    display:grid;
+    grid-template-columns: repeat(13, 1fr);
+    grid-template-rows: repeat(13, 1fr);
+    background-color: grey;
+}
+
+nav{
+    grid-column: 1/-1;
+    grid-row:1/1;
+}
+
+footer{
+    grid-column:1/-1;
+    grid-row:-1/-2;
+}
+
+.gamePanel{
+    grid-column: 1/-1;
+    grid-row: 2/-2;
+
+    display:flex;
+    flex-flow:row nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.playerPanel{
+    flex:1 1 auto;
+    height:100%;
+
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+}
+
+.boardButtons{
+    grid-row: 1/2;
+    grid-column: 1/-1;
+}
+.boardInfos{
+    grid-row: 2/-1;
+    grid-column: 1/2;
+}
+.gameBoard{
+    grid-row: 2/-1;
+    grid-column: 2/-1;
+
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+}
