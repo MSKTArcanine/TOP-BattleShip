@@ -1,3 +1,5 @@
 import "./style.css";
+import SubmarineFactory from "./ShipFactory/submarineFactory";
 
-export const a = () => true;
+const submarineFactory = new SubmarineFactory();
+console.log(submarineFactory.maxInstance)
