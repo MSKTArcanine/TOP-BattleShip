@@ -1,5 +1,4 @@
 import "./style.css";
-import SubmarineFactory from "./ShipFactory/submarineFactory";
+import GameBoard from "./gameBoard";
 
-const submarineFactory = new SubmarineFactory();
-console.log(submarineFactory.maxInstance)
+const gameBoard = new GameBoard();
