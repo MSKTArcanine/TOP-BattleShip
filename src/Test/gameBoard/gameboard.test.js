@@ -1,6 +1,7 @@
-import GameBoard, { getArrayOfCoordinates, getBiggestCoordinates, getCoordinatesForm, getDifferenceFromCoordinates, getNonZeroFromDiff, outOfBondsCheck, subtractFromCoordinates } from "../../gameBoard";
+import GameBoard, { checkForCoordinatesCollisions, getArrayOfCoordinates, getBiggestCoordinates, getCoordinatesForm, getDifferenceFromCoordinates, getNonZeroFromDiff, outOfBondsCheck, positionShipOnBoard, subtractFromCoordinates } from "../../gameBoard";
 import Submarine from "../../Ships/submarine";
 import { coordinatesPrompt, coordinatesChecker, isLine, lengthCheck } from "../../gameBoard";
+import { zeros } from "mathjs";
 
 jest.mock("../../Ships/submarine");
 
@@ -22,11 +23,28 @@ describe('Add ship to storage', ()=>{
     })
 })
 
+describe('getBoard, getShipAt', ()=>{
+    test('getBoard gives a zeros matrix 10x10', ()=>{
+        expect(gameboard.getBoard()).toEqual(zeros([10,10]))
+    })
+    test('getShipAt returns 0 if no ship', () => {
+        expect(gameboard.getShipAt(0,0)).toBe(0);
+    })
+    const gameBoardWithShip = new GameBoard();
+    gameBoardWithShip.board[0][0] = new Submarine();
+    test('getBoard returns a non zeros matrix is ships are present', () => expect(gameBoardWithShip.getBoard()).not.toEqual(zeros([10,10])))
+    test('getShipAt return ship object correctly', ()=>{
+        expect(gameBoardWithShip.getShipAt(0,0)).toBeInstanceOf(Submarine)
+    })
+})
+
 describe('coordinatesPrompt()', () => {
     global.prompt = jest.fn().mockReturnValueOnce('1,1,1,2')
     .mockReturnValueOnce('9,0,10,0');
     expect(coordinatesPrompt(new Submarine())).toBe('1,1,1,2');
     expect(coordinatesPrompt(new Submarine())).toBe('9,0,10,0');
+
+    delete global.prompt;
 });
 
 describe('coordinatesChecker()', () => {
@@ -47,6 +65,10 @@ describe('lengthCheck()', ()=>{
     expect(lengthCheck([0,2], 3)).toBeTruthy();
 })
 describe('getCoordinatesForm()', ()=>{
+    test('Type check', ()=>{
+        expect(getCoordinatesForm(1,1,1,2)[0][0] + 1).toBe(2);
+        expect(getCoordinatesForm(1,1,1,2)[0][0] + 0).not.toBe("10");
+    })
     expect(getCoordinatesForm(1,1,1,2)).toEqual([[1,1],[1,2]]);
     expect(getCoordinatesForm(6,2,2,4)).toEqual([[6,2],[2,4]]);
 })
@@ -80,4 +102,20 @@ describe('getArrayOfCoordinates()', ()=>{
     expect(getArrayOfCoordinates([6,3], 3, 0)).toEqual([[6,3], [5,3], [4,3]])
     expect(getArrayOfCoordinates([1,6], 2, 1)).toEqual([[1,6], [1,5]])
     expect(getArrayOfCoordinates([9,2], 3, 0)).toEqual([[9,2], [8,2], [7,2]])
+})
+
+describe('checkForCoordinatesCollisions()', ()=>{
+    const gameBoardTestCollisions = new GameBoard();
+    gameBoardTestCollisions.placeAt(new Submarine(), 0, 0);
+    expect(checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,0]])).toBeFalsy();
+    expect(checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,1]])).toBeTruthy();
+    expect(checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,0], [1,0]])).toBeFalsy();
+    expect(checkForCoordinatesCollisions(gameBoardTestCollisions, [[1,1], [1,2]])).toBeTruthy();
+})
+
+describe('positionShipOnBoard()', ()=>{
+    const gameboardPosition = new GameBoard();
+    positionShipOnBoard(gameboardPosition.getBoard(), new Submarine(), [[0,1], [0,2]]);
+    expect(gameboardPosition.getShipAt(0, 1)).toBeInstanceOf(Submarine);
+    expect(gameboardPosition.getShipAt(0, 2)).toBeInstanceOf(Submarine);
 })
