@@ -20,36 +20,33 @@ export default class GameBoard{
     placeShipOnBoard(){
         this.ships.forEach(
             ship => {
-                let coordinates;
-                let coo1, coo2, difference, nonZeroIndex, coordinateToChange;
-                let arrayOfCoordinates = [];
                 while(true){
-                    coordinates = GameBoardUtils.coordinatesPrompt(ship);
+                    const coordinates = GameBoardUtils.coordinatesPrompt(ship);
                     const [u1, v1, u2, v2] = coordinates.split(',');
-                    if(GameBoardUtils.coordinatesChecker(coordinates)){
-                        [coo1, coo2] = GameBoardUtils.getCoordinatesForm(u1, v1, u2, v2);
-                        difference = GameBoardUtils.getDifferenceFromCoordinates(coo1, coo2);
-                        if(GameBoardUtils.isLine(difference)){
-                            if(GameBoardUtils.lengthCheck(difference, ship.length)){
-                                if(GameBoardUtils.outOfBondsCheck(u1, u2, v1, v2)){
-                                    nonZeroIndex = GameBoardUtils.getNonZeroFromDiff(difference);
-                                    coordinateToChange = GameBoardUtils.getBiggestCoordinates(coo1, coo2);
-                                    arrayOfCoordinates = GameBoardUtils.getArrayOfCoordinates(coordinateToChange, ship.length, nonZeroIndex);
-                                    if(GameBoardUtils.checkForCoordinatesCollisions(this, arrayOfCoordinates)){
-                                        GameBoardUtils.positionShipOnBoard(this.board, ship, arrayOfCoordinates)
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    if(!GameBoardUtils.coordinatesChecker(coordinates))
+                        continue;
+                    const [coo1, coo2] = GameBoardUtils.getCoordinatesForm(u1, v1, u2, v2);
+                    const difference = GameBoardUtils.getDifferenceFromCoordinates(coo1, coo2);
+                    if(!GameBoardUtils.isLine(difference))
+                        continue;
+                    if(!GameBoardUtils.lengthCheck(difference, ship.length))
+                        continue;
+                    if(!GameBoardUtils.outOfBondsCheck(u1, v1, u2, v2))
+                        continue;
+                    const nonZeroIndex = GameBoardUtils.getNonZeroFromDiff(difference);
+                    const coordinateToChange = GameBoardUtils.getBiggestCoordinates(coo1, coo2);
+                    const arrayOfCoordinates = GameBoardUtils.getArrayOfCoordinates(coordinateToChange, ship.length, nonZeroIndex);
+                    if(!GameBoardUtils.checkForCoordinatesCollisions(this, arrayOfCoordinates))
+                        continue;
+                    GameBoardUtils.positionShipOnBoard(this.board, ship, arrayOfCoordinates);
+                    break;
                 }
             }
         )
         this.isShipsPlaced = true;
     }
     receiveAttack(u, v){
-        if(checkForHit(this, u, v)){
+        if(GameBoardUtils.checkForHit(this, u, v)){
             //todo : signal to ship, make chip.hits += 1, checkforsink => PUBSUB
         }
     }
