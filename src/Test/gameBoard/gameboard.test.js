@@ -4,10 +4,12 @@ import { zeros } from "mathjs";
 import GameBoardUtils from "../../gameBoardUtils";
 import SunkEvent from "../../PubSub/SunkEvent";
 import HitEvent from "../../PubSub/HitEvent";
+import GameOverEvent from "../../PubSub/GameOverEvent";
 
+const gameOverEvent = new GameOverEvent();
 const sunkEvent = new SunkEvent();
 const hitEvent = new HitEvent()
-const gameboard = new GameBoard(sunkEvent, hitEvent);
+const gameboard = new GameBoard(sunkEvent, hitEvent, gameOverEvent);
 
 describe('init', ()=>{
     it('has board', ()=>expect(gameboard).toBeTruthy());
@@ -142,6 +144,7 @@ describe('ReceiveAttack()', ()=>{
     const gameBoardAttack = new GameBoard(sunkEvent, hitEvent);
     gameBoardAttack.placeAt(new Submarine(sunkEvent, hitEvent), 1, 1);
 
+    test('getShip() should be instance of submarine', ()=>expect(gameBoardAttack.getShipAt(1,1) instanceof Submarine).toBeTruthy())
     test('Attack on boat should be truthy', ()=>{expect(gameBoardAttack.receiveAttack(1, 1)).toBeTruthy();})
     test('Attack on O/0 should be falsy', ()=>expect(gameBoardAttack.receiveAttack(0, 1)).toBeFalsy());
     test('Should replace ship hit by an X', ()=>expect(gameBoardAttack.getShipAt(1, 1)).toBe("X"));

@@ -4,7 +4,9 @@ import Ship from "./Ships/ship";
 import SunkEvent from "./PubSub/SunkEvent";
 import HitEvent from "./PubSub/HitEvent";
 export default class GameBoard{
-    constructor(sunkEvent, hitEvent){
+    static id = 0;
+    constructor(sunkEvent, hitEvent, gameOverEvent){
+        this.id = GameBoard.id++;
         this.board = zeros([10, 10]);
         this.ships = [];
         this.isShipsPlaced = false;
@@ -12,6 +14,7 @@ export default class GameBoard{
         this.hitEvent = hitEvent;
         this.sunkenShips = 0;
         this.sunkEvent.subscribe(this.receiveOnSunk.bind(this));
+        this.gameOverEvent = gameOverEvent;
     }
     
     getBoard(){return this.board}
@@ -57,10 +60,11 @@ export default class GameBoard{
         const hitObj = this.getShipAt(u, v);
         if(hitObj instanceof Ship){
             //todo : signal to ship, make chip.hits += 1, checkforsink => PUBSUB
+            
+            //EVENT ONHIT
             this.emitOnHit(hitObj);
             //Place X on hitzone
             this.placeAt("X", u, v);
-            //EVENT ONHIT
             return true;
         }else{
             if(hitObj === "X")
@@ -77,5 +81,11 @@ export default class GameBoard{
     receiveOnSunk(ship){
         console.log(`${ship.name} has been sunk !`);
         this.sunkenShips += 1;
+        if(this.sunkenShips > this.ships.length)
+            this.emitGameOver();
     }
+    emitGameOver(){
+        console.log('Emitted from emitGameOver');
+        this.gameOverEvent.emit();
+    };
 }
