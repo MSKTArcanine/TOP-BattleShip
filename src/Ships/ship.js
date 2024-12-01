@@ -10,15 +10,23 @@ export default class Ship {
         this.name = `${this.constructor.name}`
         this.sunkEvent = sunkEvent;
         this.hitEvent = hitEvent;
-    }
-
-    hit(){
-        this.hits += 1;
+        this.hitEvent.subscribe(ship => _hit(ship));
     }
     isSunk(){
-        if(this.hits >= this.length)
-            {this.sunk = true; return true}
+        if(this.hits >= this.length){
+            this.sunk = true;
+            this.emitOnSunk();
+            return true
+        }
         return false;
+    }
+    emitOnSunk(){
+        this.sunkEvent.emit(this);
     }
 }
 
+function _hit(ship){
+    console.log(`${ship.name} has been hit !`);
+    ship.hits += 1;
+    ship.isSunk();
+}

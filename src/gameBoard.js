@@ -1,12 +1,17 @@
 import { zeros } from "mathjs";
 import GameBoardUtils from "./gameBoardUtils";
 import Ship from "./Ships/ship";
+import SunkEvent from "./PubSub/SunkEvent";
+import HitEvent from "./PubSub/HitEvent";
 export default class GameBoard{
-    constructor(event){
+    constructor(sunkEvent, hitEvent){
         this.board = zeros([10, 10]);
         this.ships = [];
         this.isShipsPlaced = false;
-        this.event = event;
+        this.sunkEvent = sunkEvent;
+        this.hitEvent = hitEvent;
+        this.sunkenShips = 0;
+        this.sunkEvent.subscribe(this.receiveOnSunk.bind(this));
     }
     
     getBoard(){return this.board}
@@ -40,6 +45,7 @@ export default class GameBoard{
                     const arrayOfCoordinates = GameBoardUtils.getArrayOfCoordinates(coordinateToChange, ship.length, nonZeroIndex);
                     if(!GameBoardUtils.checkForCoordinatesCollisions(this, arrayOfCoordinates))
                         continue;
+                    console.log(`Placing ship: ${ship.name} at ${arrayOfCoordinates}`)
                     GameBoardUtils.positionShipOnBoard(this.board, ship, arrayOfCoordinates);
                     break;
                 }
@@ -48,17 +54,28 @@ export default class GameBoard{
         this.isShipsPlaced = true;
     }
     receiveAttack(u, v){
-        if(this.getShipAt(u, v) instanceof Ship){
+        const hitObj = this.getShipAt(u, v);
+        if(hitObj instanceof Ship){
             //todo : signal to ship, make chip.hits += 1, checkforsink => PUBSUB
+            this.emitOnHit(hitObj);
+            //Place X on hitzone
             this.placeAt("X", u, v);
             //EVENT ONHIT
             return true;
         }else{
-            if(this.getShipAt(u, v) === "X")
+            if(hitObj === "X")
                 return false;
             
             this.placeAt("O", u, v);
             return false;
         }
+    }
+    emitOnHit(ship){
+        console.log('ship emitted : ' + ship.constructor.name)
+        this.hitEvent.emit(ship);
+    }
+    receiveOnSunk(ship){
+        console.log(`${ship.name} has been sunk !`);
+        this.sunkenShips += 1;
     }
 }

@@ -1,7 +1,13 @@
+import GameBoard from "../../gameBoard.js";
+import HitEvent from "../../PubSub/HitEvent.js";
+import SunkEvent from "../../PubSub/SunkEvent.js";
 import Cuirasse from "../../Ships/cuirasse.js";
 
 describe('cuirasse', ()=>{
-    const cuirasse = new Cuirasse();
+    const hitEvent = new HitEvent();
+    const sunkEvent = new SunkEvent();
+    const gameBoard = new GameBoard(sunkEvent, hitEvent);
+    const cuirasse = new Cuirasse(sunkEvent, hitEvent);
 
     test('init', ()=>{
         expect(cuirasse.length).toBe(5);

@@ -2,18 +2,24 @@ import GameBoard from "../../gameBoard";
 import Submarine from "../../Ships/submarine";
 import { zeros } from "mathjs";
 import GameBoardUtils from "../../gameBoardUtils";
+import SunkEvent from "../../PubSub/SunkEvent";
+import HitEvent from "../../PubSub/HitEvent";
 
-const gameboard = new GameBoard();
+const sunkEvent = new SunkEvent();
+const hitEvent = new HitEvent()
+const gameboard = new GameBoard(sunkEvent, hitEvent);
 
 describe('init', ()=>{
     it('has board', ()=>expect(gameboard).toBeTruthy());
     it('has a storage for ships', ()=>expect(gameboard.ships).toBeTruthy());
     test('ships length === 0', ()=>expect(gameboard.ships.length).toBe(0));
+    it('has sunkEvent', ()=>expect(gameboard.sunkEvent instanceof SunkEvent).toBeTruthy());
+    it('has hitEvent', ()=>expect(gameboard.hitEvent instanceof HitEvent).toBeTruthy())
 })
 
 describe('Add ship to storage', ()=>{
     test('ship is added correctly', ()=>{
-        gameboard.addShipToStorage(new Submarine());
+        gameboard.addShipToStorage(new Submarine(sunkEvent, hitEvent));
         expect(gameboard.ships.length).toBe(1);
     })
     test('Only ship are allowed', ()=>{
@@ -28,8 +34,8 @@ describe('getBoard, getShipAt', ()=>{
     test('getShipAt returns 0 if no ship', () => {
         expect(gameboard.getShipAt(0,0)).toBe(0);
     })
-    const gameBoardWithShip = new GameBoard();
-    gameBoardWithShip.board[0][0] = new Submarine();
+    const gameBoardWithShip = new GameBoard(sunkEvent, hitEvent);
+    gameBoardWithShip.board[0][0] = new Submarine(sunkEvent, hitEvent);
     test('getBoard returns a non zeros matrix is ships are present', () => expect(gameBoardWithShip.getBoard()).not.toEqual(zeros([10,10])))
     test('getShipAt return ship object correctly', ()=>{
         expect(gameBoardWithShip.getShipAt(0,0)).toBeInstanceOf(Submarine)
@@ -39,8 +45,8 @@ describe('getBoard, getShipAt', ()=>{
 describe('coordinatesPrompt()', () => {
     global.prompt = jest.fn().mockReturnValueOnce('1,1,1,2')
     .mockReturnValueOnce('9,0,10,0');
-    expect(GameBoardUtils.coordinatesPrompt(new Submarine())).toBe('1,1,1,2');
-    expect(GameBoardUtils.coordinatesPrompt(new Submarine())).toBe('9,0,10,0');
+    expect(GameBoardUtils.coordinatesPrompt(new Submarine(sunkEvent, hitEvent))).toBe('1,1,1,2');
+    expect(GameBoardUtils.coordinatesPrompt(new Submarine(sunkEvent, hitEvent))).toBe('9,0,10,0');
 
     delete global.prompt;
 });
@@ -103,8 +109,8 @@ describe('getArrayOfCoordinates()', ()=>{
 })
 
 describe('checkForCoordinatesCollisions()', ()=>{
-    const gameBoardTestCollisions = new GameBoard();
-    gameBoardTestCollisions.placeAt(new Submarine(), 0, 0);
+    const gameBoardTestCollisions = new GameBoard(sunkEvent, hitEvent);
+    gameBoardTestCollisions.placeAt(new Submarine(sunkEvent, hitEvent), 0, 0);
     expect(GameBoardUtils.checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,0]])).toBeFalsy();
     expect(GameBoardUtils.checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,1]])).toBeTruthy();
     expect(GameBoardUtils.checkForCoordinatesCollisions(gameBoardTestCollisions, [[0,0], [1,0]])).toBeFalsy();
@@ -112,17 +118,17 @@ describe('checkForCoordinatesCollisions()', ()=>{
 })
 
 describe('positionShipOnBoard()', ()=>{
-    const gameboardPosition = new GameBoard();
-    GameBoardUtils.positionShipOnBoard(gameboardPosition.getBoard(), new Submarine(), [[0,1], [0,2]]);
+    const gameboardPosition = new GameBoard(sunkEvent, hitEvent);
+    GameBoardUtils.positionShipOnBoard(gameboardPosition.getBoard(), new Submarine(sunkEvent, hitEvent), [[0,1], [0,2]]);
     expect(gameboardPosition.getShipAt(0, 1)).toBeInstanceOf(Submarine);
     expect(gameboardPosition.getShipAt(0, 2)).toBeInstanceOf(Submarine);
 })
 
 describe('checkForHit()', ()=>{
-    const gameboardCheckHit = new GameBoard();
-    gameboardCheckHit.placeAt(new Submarine(), 0, 0);
-    gameboardCheckHit.placeAt(new Submarine(), 9, 9);
-    gameboardCheckHit.placeAt(new Submarine(), 4, 5);
+    const gameboardCheckHit = new GameBoard(sunkEvent, hitEvent);
+    gameboardCheckHit.placeAt(new Submarine(sunkEvent, hitEvent), 0, 0);
+    gameboardCheckHit.placeAt(new Submarine(sunkEvent, hitEvent), 9, 9);
+    gameboardCheckHit.placeAt(new Submarine(sunkEvent, hitEvent), 4, 5);
     it('should return true if ship is returned, else false', ()=>{
         expect(GameBoardUtils.checkForHit(gameboardCheckHit, 0, 0)).toBeTruthy();
         expect(GameBoardUtils.checkForHit(gameboardCheckHit, 9, 9)).toBeTruthy();
@@ -133,8 +139,8 @@ describe('checkForHit()', ()=>{
 })
 
 describe('ReceiveAttack()', ()=>{
-    const gameBoardAttack = new GameBoard();
-    gameBoardAttack.placeAt(new Submarine(), 1, 1);
+    const gameBoardAttack = new GameBoard(sunkEvent, hitEvent);
+    gameBoardAttack.placeAt(new Submarine(sunkEvent, hitEvent), 1, 1);
 
     test('Attack on boat should be truthy', ()=>{expect(gameBoardAttack.receiveAttack(1, 1)).toBeTruthy();})
     test('Attack on O/0 should be falsy', ()=>expect(gameBoardAttack.receiveAttack(0, 1)).toBeFalsy());
@@ -142,4 +148,16 @@ describe('ReceiveAttack()', ()=>{
     test('Should replace anything else than X/Ship by an O', ()=>expect(gameBoardAttack.getShipAt(0, 1)).toBe('O'));
     test('Should be false on already hit zone', ()=>expect(gameBoardAttack.receiveAttack(1, 1)).toBeFalsy());
     test('Should NOT replace X by O', ()=>expect(gameBoardAttack.getShipAt(1, 1)).toBe("X"));
+})
+
+describe('Testing receiveAttack with events', ()=>{
+    const submarineEvent = new Submarine(sunkEvent, hitEvent);
+    const gameBoardEvents = new GameBoard(sunkEvent, hitEvent);
+    
+    gameBoardEvents.placeAt(submarineEvent, 1, 1);
+    gameBoardEvents.placeAt(submarineEvent, 1, 2);
+
+    it('Return truthy on hit', ()=>expect(gameBoardEvents.receiveAttack(1, 1)).toBeTruthy());
+    console.log(submarineEvent.hits);
+    test('submarineEvent hits = 1', ()=>expect(submarineEvent.hits).toBe(1));
 })

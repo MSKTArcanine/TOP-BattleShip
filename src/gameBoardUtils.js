@@ -46,6 +46,7 @@ export default class GameBoardUtils {
     static positionShipOnBoard(board, ship, arrayOfCoordinates){
         arrayOfCoordinates.forEach(
             coordinates => {
+                console.log('ship placed : ' + ship.constructor.name + ' at : ' + coordinates);
                 board[coordinates[0]][coordinates[1]] = ship;
             }
         )

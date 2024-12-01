@@ -1,7 +1,14 @@
 import Croiseur from "../../Ships/croiseur.js";
+import HitEvent from "../../PubSub/HitEvent.js";
+import SunkEvent from "../../PubSub/SunkEvent.js";
+import GameBoard from "../../gameBoard.js";
 
 describe('Croiseur', ()=>{
-    const croiseur = new Croiseur();
+    const sunkEvent = new SunkEvent();
+    const hitEvent = new HitEvent();
+    const croiseur = new Croiseur(sunkEvent, hitEvent);
+    const gameBoard = new GameBoard(sunkEvent, hitEvent);
+    
 
     test('init', ()=>{
         expect(croiseur.length).toBe(4);

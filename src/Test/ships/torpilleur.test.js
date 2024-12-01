@@ -1,7 +1,13 @@
+import GameBoard from "../../gameBoard.js";
+import HitEvent from "../../PubSub/HitEvent.js";
+import SunkEvent from "../../PubSub/SunkEvent.js";
 import Torpilleur from "../../Ships/torpilleur.js";
 
 describe('torpilleur', ()=>{
-    const torpilleur = new Torpilleur();
+    const sunkEvent = new SunkEvent();
+    const hitEvent = new HitEvent();
+    const gameBoard = new GameBoard(sunkEvent, hitEvent);
+    const torpilleur = new Torpilleur(sunkEvent, hitEvent);
 
     test('init', ()=>{
         expect(torpilleur.length).toBe(3);
