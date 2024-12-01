@@ -1,5 +1,6 @@
 import { zeros } from "mathjs";
 import GameBoardUtils from "./gameBoardUtils";
+import Ship from "./Ships/ship";
 export default class GameBoard{
     constructor(event){
         this.board = zeros([10, 10]);
@@ -47,9 +48,17 @@ export default class GameBoard{
         this.isShipsPlaced = true;
     }
     receiveAttack(u, v){
-        if(this.getShipAt(u, v) != 0){
+        if(this.getShipAt(u, v) instanceof Ship){
             //todo : signal to ship, make chip.hits += 1, checkforsink => PUBSUB
-
+            this.placeAt("X", u, v);
+            //EVENT ONHIT
+            return true;
+        }else{
+            if(this.getShipAt(u, v) === "X")
+                return false;
+            
+            this.placeAt("O", u, v);
+            return false;
         }
     }
 }

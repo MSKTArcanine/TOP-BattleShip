@@ -1,10 +1,7 @@
-import GameBoard, { checkForCoordinatesCollisions, checkForHit, getArrayOfCoordinates, getBiggestCoordinates, getCoordinatesForm, getDifferenceFromCoordinates, getNonZeroFromDiff, outOfBondsCheck, positionShipOnBoard, subtractFromCoordinates } from "../../gameBoard";
+import GameBoard from "../../gameBoard";
 import Submarine from "../../Ships/submarine";
-import { coordinatesPrompt, coordinatesChecker, isLine, lengthCheck } from "../../gameBoard";
 import { zeros } from "mathjs";
 import GameBoardUtils from "../../gameBoardUtils";
-
-jest.mock("../../Ships/submarine");
 
 const gameboard = new GameBoard();
 
@@ -133,4 +130,16 @@ describe('checkForHit()', ()=>{
         expect(GameBoardUtils.checkForHit(gameboardCheckHit, 7, 5)).toBeFalsy();
         expect(GameBoardUtils.checkForHit(gameboardCheckHit, 4, 6)).toBeFalsy();
     })
+})
+
+describe('ReceiveAttack()', ()=>{
+    const gameBoardAttack = new GameBoard();
+    gameBoardAttack.placeAt(new Submarine(), 1, 1);
+
+    test('Attack on boat should be truthy', ()=>{expect(gameBoardAttack.receiveAttack(1, 1)).toBeTruthy();})
+    test('Attack on O/0 should be falsy', ()=>expect(gameBoardAttack.receiveAttack(0, 1)).toBeFalsy());
+    test('Should replace ship hit by an X', ()=>expect(gameBoardAttack.getShipAt(1, 1)).toBe("X"));
+    test('Should replace anything else than X/Ship by an O', ()=>expect(gameBoardAttack.getShipAt(0, 1)).toBe('O'));
+    test('Should be false on already hit zone', ()=>expect(gameBoardAttack.receiveAttack(1, 1)).toBeFalsy());
+    test('Should NOT replace X by O', ()=>expect(gameBoardAttack.getShipAt(1, 1)).toBe("X"));
 })

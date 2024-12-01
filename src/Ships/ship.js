@@ -1,6 +1,6 @@
 export default class Ship {
     _shipTotal = 0;
-    constructor(){
+    constructor(sunkEvent, hitEvent){
         if(new.target === Ship)throw new Error('Implementation');
         this.length;
         this.sunk = false;
@@ -8,6 +8,8 @@ export default class Ship {
         this._shipTotal += 1;
         this.id = this._shipTotal;
         this.name = `${this.constructor.name}`
+        this.sunkEvent = sunkEvent;
+        this.hitEvent = hitEvent;
     }
 
     hit(){

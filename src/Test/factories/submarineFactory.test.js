@@ -1,11 +1,19 @@
 import SubmarineFactory from "../../ShipFactory/submarineFactory";
 import Submarine from "../../Ships/submarine";
+import SunkEvent from "../../PubSub/SunkEvent";
+import HitEvent from "../../PubSub/HitEvent";
 
 jest.mock('../../Ships/submarine.js');
 
+const sunkEvent = new SunkEvent();
+const hitEvent = new HitEvent();
+
 describe("Init", ()=>{
-    const submarineFactory = new SubmarineFactory();
+    const submarineFactory = new SubmarineFactory(sunkEvent, hitEvent);
     test('maxInstance = 4', ()=>expect(submarineFactory.maxInstance).toBe(4))
+    test('this.hitEvent instanceof HitEvent', ()=>expect(submarineFactory.hitEvent instanceof HitEvent).toBeTruthy());
+    test('this.sunkEvent instanceof SunkEvent', ()=>expect(submarineFactory.sunkEvent instanceof SunkEvent).toBeTruthy());
+
 })
 
 describe("create()", ()=>{
@@ -23,6 +31,6 @@ describe("create()", ()=>{
 })
 
 describe('test instances :', ()=>{
-    const submatineFactory = new SubmarineFactory(5);
+    const submatineFactory = new SubmarineFactory(sunkEvent, hitEvent, 5);
     test('5 instances : ', ()=>expect(submatineFactory.maxInstance).toBe(5));
 })

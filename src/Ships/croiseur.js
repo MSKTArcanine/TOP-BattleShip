@@ -1,8 +1,8 @@
 import Ship from "./ship";
 
 export default class Croiseur extends Ship{
-    constructor(){
-        super();
+    constructor(sunk, hit){
+        super(sunk, hit);
         this.length = 4;
     }
 }
