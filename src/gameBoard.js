@@ -6,7 +6,6 @@ export default class GameBoard{
         this.ships = [];
         this.isShipsPlaced = false;
         this.event = event;
-        this.
     }
     
     getBoard(){return this.board}
